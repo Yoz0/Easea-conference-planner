@@ -37,7 +37,7 @@ typedef struct{
   int sesssionID;
   string sessionTitle;
   vector<Paper> papers;
-}
+}Session;
 
 typedef struct{
   int trackID;
