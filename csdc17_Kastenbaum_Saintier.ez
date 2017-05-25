@@ -1,0 +1,258 @@
+/* vim:syntax=cpp:filetype=cpp
+*/
+/*_____________________________________________________________
+
+Template for an EASEA evolutionary algorithm for easea v1.0.3
+_______________________________________________________________*/
+
+\User declarations : // This section is copied on top of the output file
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <cstdio>
+#include <cstdlib>
+#include <vector>
+#include <stdio.h>
+#include <string.h>
+#include <algorithm>
+
+using namespace std;
+
+typedef struct{
+  int paperID;
+  string paperTitle;
+  int trackID;
+  string trackTitle;
+  int sessionID;
+  string sessionTitle;
+  int authorID;
+  string authorTitle;
+  int utc;
+  vector<int[2]> constraints;
+}Paper;
+
+typedef struct{
+  int trackID;
+  string trackTitle;
+  int sesssionID;
+  string sessionTitle;
+  vector<Paper> papers;
+}
+
+typedef struct{
+  int trackID;
+  string trackTitle;
+  vector<Session> sessions;
+}Track;
+
+ifstream fPaper;
+vector<Paper> papers;
+vector<Track> tracks;
+
+\end
+
+\User functions:
+
+//Read Papers File
+//PaperID | PaperTitle | TrackID | TrackTitle | SessionID | SessionTitle | AuthorID | AuthorTitle | utc | TimeConstraint Day 1 | TimeConstraint Day 2 | TimeConstraint Day 3
+void readPapersFile(){
+  /*
+  int bNewPaper=1;
+  fPaper.open("papers.txt", ios::in);
+  string line;
+  if (fPaper.is_open()) {
+    Paper p;
+    p.ID = 0;
+    while ( getline (fPaper,line) ) {
+      line.erase(line.length()-2,line.length()-1);
+      char * cstr = new char [line.length()+1];
+      strcpy (cstr, line.c_str());
+      char *szKeywords, *szAbstKeywords;
+      char * s;
+      s = strtok (cstr,"|");
+      if(p.ID!=0 && p.ID != atoi(s)) { 
+        papers.push_back(p); 
+        Paper newP; 
+        p = newP; 
+        bNewPaper=1;
+      }
+      p.ID = atoi(s);
+      s = strtok (NULL, "|"); p.title = s;
+      s = strtok (NULL, "|"); p.nReqRev = atoi(s);
+      s = strtok (NULL, "|"); p.vAuthors.push_back(s);
+      s = strtok (NULL, "|"); p.vMails.push_back(s);
+      s = strtok (NULL, "|"); szKeywords = s;
+      s = strtok (NULL, "|"); szAbstKeywords = s;
+
+      s = strtok (szKeywords,",");
+      while(bNewPaper&&s) {
+        p.vTitleKeywords.push_back(s);
+        s = strtok (NULL, ",");
+      }
+      s = strtok (szAbstKeywords,"|,");
+      while(bNewPaper&&s) {
+        p.vAbstKeywords.push_back(s);
+        s = strtok (NULL, ",|");
+      }
+      bNewPaper=0;
+    } 
+    papers.push_back(p); //push du dernier papier
+    fPaper.close();
+    */
+}
+
+string trim(string& str) {
+    size_t first = str.find_first_not_of(' ');
+    size_t last = str.find_last_not_of(' ');
+    if((int)first < 0)
+      return "";
+    return str.substr(first, (last-first+1));
+}
+
+void displayVector(vector<string> v){
+  int i;
+  for(i = 0; i < v.size(); i++)
+  {
+    std::cout << trim(v.at(i));
+    if(i != v.size()-1)
+      std::cout << ", ";
+  }
+}
+
+void displayPaper(Paper p){
+  /*
+  std::cout << "Paper     : " << p.ID<< " - "<<trim(p.title)<<"\n";
+  std::cout << "Authors   : ";
+  displayVector(p.vAuthors);
+  std::cout << "\ne-mails   : ";
+  displayVector(p.vMails);
+  std::cout << std::endl;
+  */
+}
+\end
+
+\User CUDA:
+//Transfert some variables to GPU here (cudaMalloc, MemCpy)
+\end
+
+\User classes :
+Creneau {
+  Paper* paper;
+  int startTime;
+}
+GenomeClass { 
+  vector<Creneau> creneaux; 
+}
+\end
+
+\Before everything else function:
+
+readPapersFile();
+
+\end
+
+\After everything else function:
+ /* int i, j; */
+ /* for (i=0;i<papers.size();i++) { */  
+ /*  Paper currentPaper = papers.at(i); */
+ /*  displayPaper(currentPaper); */
+  
+ /*  for(j=0;j<currentPaper.nReqRev;j++){ */
+ /*    Reviewer currentRev = reviewers.at(bBest->paper[i].reviewer[j]); */
+ /*    std::cout << "Reviewer "<<3-currentPaper.nReqRev+j+1<<": " << currentRev.name << ", " << currentRev.mail <<"\n"; */
+ /*    //cout << "            Penalty > 3 pap  : " << currentRev.nPenaltyForMoreThan3Papers <<"\n";; */
+ /*    //cout << "            Penalty same org : " << bBest->paper[i].OrganisationVerification[j] <<"\n";; */
+ /*    //cout << "            Penalty unwilling: " << bBest->paper[i].UnWillingPenalty[j] <<"\n";; */
+ /*    //cout << "            Paper / Reviewer major keywords correlation: " <<  (bBest->paper[i].KwMatchTitleTitle[j]*100) <<"\%\n";; */
+ /*    //cout << "            Paper / Reviewer minor keywords correlation: " <<  (bBest->paper[i].KwMatchAbstAbst[j]*100) <<"\%\n";; */
+ /*    //cout << "            Paper major / Review minor kwd correlation : " <<  (bBest->paper[i].KwMatchTitleAbst[j]*100) <<"\%\n";; */
+ /*    //cout << "            Paper minor / Review major kwd correlation : " <<  (bBest->paper[i].KwMatchAbstTitle[j]*100) <<"\%\n";; */
+ /*    cout << "\tReviewer affinity with paper      : " << bBest->paper[i].KwMatchAbstTitle[j]*100<<"\%"; */
+ /*    if (bBest->paper[i].WillingBonus[j]) cout << " + 1000pts Bonus for desired paper!"; */
+ /*    cout <<"\n";; */
+ /*    //cout << "            Global Score (with other criteria)         : " << (bBest->paper[i].KwMatchTitleTitle[j]+bBest->paper[i].KwMatchAbstAbst[j]+bBest->paper[i].KwMatchTitleAbst[j]+bBest->paper[i].KwMatchAbstTitle[j])/4*100+bBest->paper[i].WillingBonus[j]*1000 <<"\n";; */
+ /*    cout << "\tGlobal Score (with other criteria): " << bBest->paper[i].KwMatchAbstTitle[j]*100+bBest->paper[i].WillingBonus[j]*1000 <<"\n";; */
+ /*    //cout << "            Global Score (with other criteria)         : " << (bBest->paper[i].KwMatchTitleAbst[j]+bBest->paper[i].KwMatchAbstTitle[j])/4*100+bBest->paper[i].WillingBonus[j]*1000 <<"\n";; */
+ /*    //cout << "Abstract: \n"; */
+ /*    //for (int k=0;k<currentPaper.vTitleKeywords.size();k++) */
+ /*      //cout<<currentPaper.vTitleKeywords.at(k)<<", "; */
+ /*    //cout << "-----------\n"; */
+ /*  } */
+ /*     std::cout << std::endl; */
+   
+ /* } */
+\end
+
+\At the beginning of each generation function:
+//cout << "At the beginning of each generation function called" << endl;
+\end
+
+\At the end of each generation function:
+//cout << "At the end of each generation function called" << endl;
+\end
+
+\At each generation before reduce function:
+//cout << "At each generation before replacement function called" << endl;
+\end
+
+\GenomeClass::display:
+\end
+
+\GenomeClass::initialiser : // "initializer" is also accepted
+/*
+  unsigned int i,j,k,bIdent = 0;
+  for(i = 0; i < papers.size(); i++)
+    for(j = 0;j < REV_PER_PAP; j++){
+      do{ bIdent = 0;
+        Genome.paper[i].reviewer[j] = (int) random(0,reviewers.size()-1);
+        for(k = 0;k < j; k++) if(Genome.paper[i].reviewer[j] == Genome.paper[i].reviewer[k]) bIdent=1;
+      }while(bIdent);
+    }
+*/
+\end
+
+\GenomeClass::crossover : 
+\end
+
+\GenomeClass::mutator : // Must return the number of mutations
+\end
+
+\GenomeClass::evaluator : // Returns the score as a real value
+
+\end
+
+\User Makefile options: 
+\end
+
+\Default run parameters :        // Please let the parameters appear in this order
+  Number of generations : 300    // NB_GEN
+  Time limit: 0                  // In seconds, 0 to deactivate
+  Population size : 64       //POP_SIZE
+  Offspring size : 64// or a xx%
+  Mutation probability : 0.8       // MUT_PROB
+  Crossover probability : 1      // XOVER_PROB
+  Evaluator goal : maximise      // maximise
+  Selection operator: Tournament 0.6
+  Surviving parents: 100%        // Percentage or absolute  
+  Surviving offspring: 100%      // Percentage or absolute  d
+  Reduce parents operator: Tournament 2
+  Reduce offspring operator: Tournament 2
+  Final reduce operator: Tournament 2
+
+  Elitism: strong                 // Weak or Strong
+  Elite: 1
+  Print stats: true               // Default: 1
+  Generate csv stats file:true      
+  Generate gnuplot script:false
+  Generate R script:false
+  Plot stats:true                 // Default: 0
+
+  Remote island model: true
+  IP file: ip.txt                // List of IP:PORT of islands to send individuals to
+  Migration probability: 0.3    // Probability of sending an individual per generation
+  Server port : 2929
+
+  Save population: false
+  Start from file:false
+\end
+
