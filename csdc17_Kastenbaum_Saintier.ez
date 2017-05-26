@@ -19,6 +19,11 @@ _______________________________________________________________*/
 using namespace std;
 
 typedef struct{
+  int begin;
+  int end;
+}Constraint;
+
+typedef struct{
   int paperID;
   string paperTitle;
   int trackID;
@@ -26,7 +31,8 @@ typedef struct{
   int sessionID;
   string sessionTitle;
   int utc;
-  vector<int[2]> constraints;
+  int duration;
+  vector<Constraint> constraints;
 }Paper;
 
 typedef struct{
@@ -51,8 +57,18 @@ vector<Track> tracks;
 
 \User functions:
 
+void displayConstraint(Constraint c){
+  cout << c.begin <<  " " << c.end;
+}
 void displayPaper(Paper p){
   cout << "    Paper : " << p.paperID << " - " << p.paperTitle << endl;
+  cout << "      UTC : " << p.utc << " Duration : " << p.duration  << endl;
+  cout << "      Constraint : ";
+  for (int i=0; i < p.constraints.size(); i++){
+    displayConstraint(p.constraints[i]);
+    cout << " ; ";
+  }
+  cout << endl;
 }
 
 void displaySession(Session s){
@@ -102,11 +118,9 @@ Track& getTrack(int trackID, string trackTitle){
 Session& getSessionInTrack(Track& track, int sessionID, string sessionTitle){
   for (int i=0; i < track.sessions.size(); i++){
     if (track.sessions[i].sessionID == sessionID){
-      cout << "Found session : " << sessionID << endl;
       return track.sessions[i];
     }
   }
-  cout << "Creating session : " << sessionID << endl;
   Session s;
   s.sessionID = sessionID;
   s.sessionTitle = sessionTitle;
@@ -116,8 +130,25 @@ Session& getSessionInTrack(Track& track, int sessionID, string sessionTitle){
   return track.sessions.back();
 }
 
+int paperTypeToDuration(string paperType){
+  if (paperType == "Short Paper")
+    return 3;
+  if (paperType == "Invited talk")
+    return 3;
+  if (paperType == "Full Paper")
+    return 6;
+  if (paperType == "New Result invited paper")
+    return 6;
+  if (paperType == "Advanced Introduction invited talk")
+    return 6;
+  if (paperType == "Poster")
+    return 1;
+  else
+    return 2; // This is the default value, cause why not
+}
+
 //Read Papers File
-//PaperID | PaperTitle | TrackID | TrackTitle | SessionID | SessionTitle | AuthorID | AuthorTitle | utc | TimeConstraint Day 1 | TimeConstraint Day 2 | TimeConstraint Day 3
+//PaperID | PaperTitle | TrackID | TrackTitle | SessionID | SessionTitle | paperType | utc | TimeConstraint Day 1 | TimeConstraint Day 2 | TimeConstraint Day 3
 void readPapersFile(){
   fPaper.open("papers.csv", ios::in);
   const char sep = '%';
@@ -126,6 +157,8 @@ void readPapersFile(){
     while ( getline (fPaper,line) ) {
       Paper p;
       string token;
+      char * tokenStart, * tokenEnd;
+      string paperType;
       size_t lastSep = 0;
       token = my_strtok(line, sep, lastSep); p.paperID = atoi(token.c_str());
       token = my_strtok(line, sep, lastSep); p.paperTitle = token;
@@ -133,6 +166,45 @@ void readPapersFile(){
       token = my_strtok(line, sep, lastSep); p.trackTitle = token;
       token = my_strtok(line, sep, lastSep); p.sessionID = atoi(token.c_str());
       token = my_strtok(line, sep, lastSep); p.sessionTitle = token;
+      token = my_strtok(line, sep, lastSep);
+      p.duration = paperTypeToDuration(token);
+      token = my_strtok(line, sep, lastSep); p.utc = atoi(token.c_str())*12;
+
+      string day1constraint = my_strtok(line, sep, lastSep);
+      char * d1str = new char [day1constraint.length()];
+      strcpy(d1str, day1constraint.c_str());
+      tokenStart = strtok(d1str, ",[]"); tokenEnd = strtok(NULL, ",[]");
+      while (tokenStart != NULL && tokenEnd != NULL){
+        Constraint c;
+        c.begin = atoi(tokenStart)*12+p.utc;
+        c.end  = atoi(tokenEnd)*12+p.utc;
+        p.constraints.push_back(c);
+        tokenStart = strtok(NULL, ",[]"); tokenEnd = strtok(NULL, ",[]");
+      }
+
+      string day2constraint = my_strtok(line, sep, lastSep);
+      char * d2str = new char [day2constraint.length()];
+      strcpy(d2str, day2constraint.c_str());
+      tokenStart = strtok(d2str, ",[]"); tokenEnd = strtok(NULL, ",[]");
+      while (tokenStart != NULL && tokenEnd != NULL){
+        Constraint c;
+        c.begin = atoi(tokenStart)*12+p.utc+12*24;
+        c.end  = atoi(tokenEnd)*12+p.utc+12*24;
+        p.constraints.push_back(c);
+        tokenStart = strtok(NULL, ",[]"); tokenEnd = strtok(NULL, ",[]");
+      }
+
+      string day3constraint = my_strtok(line, sep, lastSep);
+      char * d3str = new char [day3constraint.length()];
+      strcpy(d3str, day3constraint.c_str());
+      tokenStart = strtok(d3str, ",[]"); tokenEnd = strtok(NULL, ",[]");
+      while (tokenStart != NULL && tokenEnd != NULL){
+        Constraint c;
+        c.begin = atoi(tokenStart)*12+p.utc+12*48;
+        c.end  = atoi(tokenEnd)*12+p.utc+12*48;
+        p.constraints.push_back(c);
+        tokenStart = strtok(NULL, ",[]"); tokenEnd = strtok(NULL, ",[]");
+      }
 
       papers.push_back(p);
 
@@ -243,7 +315,7 @@ displayAllTracks();
 \end
 
 \Default run parameters :        // Please let the parameters appear in this order
-  Number of generations : 300    // NB_GEN
+  Number of generations : 1    // NB_GEN
   Time limit: 0                  // In seconds, 0 to deactivate
   Population size : 64       //POP_SIZE
   Offspring size : 64// or a xx%
