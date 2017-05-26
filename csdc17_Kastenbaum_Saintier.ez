@@ -25,8 +25,6 @@ typedef struct{
   string trackTitle;
   int sessionID;
   string sessionTitle;
-  int authorID;
-  string authorTitle;
   int utc;
   vector<int[2]> constraints;
 }Paper;
@@ -52,9 +50,6 @@ vector<Track> tracks;
 \end
 
 \User functions:
-
-//Read Papers File
-//PaperID | PaperTitle | TrackID | TrackTitle | SessionID | SessionTitle | AuthorID | AuthorTitle | utc | TimeConstraint Day 1 | TimeConstraint Day 2 | TimeConstraint Day 3
 
 void displayPaper(Paper p){
   cout << "    Paper : " << p.paperID << " - " << p.paperTitle << endl;
@@ -121,6 +116,8 @@ Session& getSessionInTrack(Track& track, int sessionID, string sessionTitle){
   return track.sessions.back();
 }
 
+//Read Papers File
+//PaperID | PaperTitle | TrackID | TrackTitle | SessionID | SessionTitle | AuthorID | AuthorTitle | utc | TimeConstraint Day 1 | TimeConstraint Day 2 | TimeConstraint Day 3
 void readPapersFile(){
   fPaper.open("papers.csv", ios::in);
   const char sep = '%';
