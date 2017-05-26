@@ -34,7 +34,7 @@ typedef struct{
 typedef struct{
   int trackID;
   string trackTitle;
-  int sesssionID;
+  int sessionID;
   string sessionTitle;
   vector<Paper> papers;
 }Session;
@@ -55,88 +55,9 @@ vector<Track> tracks;
 
 //Read Papers File
 //PaperID | PaperTitle | TrackID | TrackTitle | SessionID | SessionTitle | AuthorID | AuthorTitle | utc | TimeConstraint Day 1 | TimeConstraint Day 2 | TimeConstraint Day 3
-void readPapersFile(){
-  int bNewPaper=1;
-  fPaper.open("papers.txt", ios::in);
-  string line;
-  if (fPaper.is_open()) {
-    while ( getline (fPaper,line) ) {
-      Paper p;
-      Track t;
-      Session s;
-      line.erase(line.length()-2,line.length()-1);
-      char * cstr = new char [line.length()+1];
-      strcpy (cstr, line.c_str());
-      char * token;
-      token = strtok (cstr,"\t"); p.paperID = atoi(token);
-      token = strtok (NULL, "\t"); p.paperTitle = token;
-      token = strtok (NULL, "\t"); p.trackID = atoi(token);
-      token = strtok (NULL, "\t"); p.trackTitle = token;
-      token = strtok (NULL, "\t"); p.sessionID = atoi(token);
-      token = strtok (NULL, "\t"); p.sessionTitle = token;
-      token = strtok (NULL, "\t"); p.authorID = atoi(token);
-      token = strtok (NULL, "\t"); p.authorTitle = token;
 
-      papers.push_back(p);
-
-      t = findTrack(p.trackID);
-      if (t == NULL){
-        Track t;
-        Session s;
-        t.trackID = p.trackID;
-        t.trackTitle = p.trackTitle;
-        s.trackID = p.trackID;
-        s.trackTitle = p.trackTitle;
-        s.sesssionID = p.sessionID;
-        s.sessionTitle = p.sessionTitle;;
-        s.papers.push_back(p);
-        t.sessions.push_back(s);
-      }
-      else if ( (s = findSessionInTrack(t, p.sessionID)) == NULL ){
-        Session s;
-        s.trackID = p.trackID;
-        s.trackTitle = p.trackTitle;
-        s.sesssionID = p.sessionID;
-        s.sessionTitle = p.sessionTitle;;
-        s.papers.push_back(p);
-        t.sessions.push_back(s);
-      }
-      else {
-        s.papers.push_back(p);
-      }
-    } 
-    fPaper.close();
-}
-
-Track& findTrack(int trackID){
-  for (int i=0; i < tracks.size(); ++i){
-    if (tracks[i].trackID == trackID){
-      return tracks[i];
-    }
-  }
-  return NULL
-}
-
-Session& findSessionInTrack(Track track, int sessionID){
-  for (int i=0; i < track.sessions.size(); i++){
-    if (track.sessions[i].sessionID == sessionID){
-      return track.sessions[i]
-    }
-  }
-  return NULL
-}
-
-void displayAllTracks() {
-  for (int i = 0; i < tracks.size(); i++){
-    displayTrack(tracks[i]);
-  }
-}
-
-void displayTrack(Track t){
-  cout << "Track : " << t.trackID << " - " << t.trackTitle << endl;
-  for (int i = 0; i < t.sessions.size(); i++){
-    displaySession(t.sessions.size);
-  }
+void displayPaper(Paper p){
+  cout << "    Paper : " << p.paperID << " - " << p.paperTitle << endl;
 }
 
 void displaySession(Session s){
@@ -148,8 +69,82 @@ void displaySession(Session s){
   }
 }
 
-void displayPaper(Paper p){
-  cout << "    Paper : " << p.paperID << " - " << p.paperTitle << endl;
+void displayTrack(Track t){
+  cout << "Track : " << t.trackID << " - " << t.trackTitle << endl;
+  for (int i = 0; i < t.sessions.size(); i++){
+    displaySession(t.sessions[i]);
+  }
+}
+
+void displayAllTracks() {
+  for (int i = 0; i < tracks.size(); i++){
+    displayTrack(tracks[i]);
+  }
+}
+
+string my_strtok(string str, const char sep, size_t& lastSep){
+  size_t nextSep = str.find_first_of(sep, lastSep);
+  string res = str.substr(lastSep, (nextSep - lastSep));
+  lastSep = nextSep + 1;
+  return res;
+}
+
+// Find an exisitng track or create it and return it
+Track& getTrack(int trackID, string trackTitle){
+  for (int i=0; i < tracks.size(); ++i){
+    if (tracks[i].trackID == trackID){
+      return tracks[i];
+    }
+  }
+  Track t;
+  t.trackID = trackID;
+  t.trackTitle = trackTitle;
+  tracks.push_back(t);
+  return tracks.back();
+}
+
+// Find an existing session in the track or create it an return it
+Session& getSessionInTrack(Track& track, int sessionID, string sessionTitle){
+  for (int i=0; i < track.sessions.size(); i++){
+    if (track.sessions[i].sessionID == sessionID){
+      cout << "Found session : " << sessionID << endl;
+      return track.sessions[i];
+    }
+  }
+  cout << "Creating session : " << sessionID << endl;
+  Session s;
+  s.sessionID = sessionID;
+  s.sessionTitle = sessionTitle;
+  s.trackID = track.trackID;
+  s.trackTitle = track.trackTitle;
+  track.sessions.push_back(s);
+  return track.sessions.back();
+}
+
+void readPapersFile(){
+  fPaper.open("papers.csv", ios::in);
+  const char sep = '%';
+  string line;
+  if (fPaper.is_open()) {
+    while ( getline (fPaper,line) ) {
+      Paper p;
+      string token;
+      size_t lastSep = 0;
+      token = my_strtok(line, sep, lastSep); p.paperID = atoi(token.c_str());
+      token = my_strtok(line, sep, lastSep); p.paperTitle = token;
+      token = my_strtok(line, sep, lastSep); p.trackID = atoi(token.c_str());
+      token = my_strtok(line, sep, lastSep); p.trackTitle = token;
+      token = my_strtok(line, sep, lastSep); p.sessionID = atoi(token.c_str());
+      token = my_strtok(line, sep, lastSep); p.sessionTitle = token;
+
+      papers.push_back(p);
+
+      Track& t = getTrack(p.trackID, p.trackTitle);
+      Session& s = getSessionInTrack(t, p.sessionID, p.sessionTitle);
+      s.papers.push_back(p);
+    } 
+    fPaper.close();
+  }
 }
 
 \end
@@ -159,18 +154,21 @@ void displayPaper(Paper p){
 \end
 
 \User classes :
+/*
 Creneau {
-  Paper* paper;
+  int paperID;
   int startTime;
 }
+*/
 GenomeClass { 
-  vector<Creneau> creneaux; 
+  int lol;
 }
 \end
 
 \Before everything else function:
 
 readPapersFile();
+displayAllTracks();
 
 \end
 
