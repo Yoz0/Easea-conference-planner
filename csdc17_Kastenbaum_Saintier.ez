@@ -16,6 +16,8 @@ _______________________________________________________________*/
 #include <string.h>
 #include <algorithm>
 
+#define NB_PAPER 263;
+
 using namespace std;
 
 typedef struct{
@@ -223,14 +225,15 @@ void readPapersFile(){
 \end
 
 \User classes :
-/*
 Creneau {
   int paperID;
+  int sessionID;
+  int trackID;
   int startTime;
 }
-*/
+
 GenomeClass { 
-  int lol;
+  Creneau* planning[NB_PAPER];
 }
 \end
 
