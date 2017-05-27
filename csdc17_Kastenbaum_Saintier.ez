@@ -20,6 +20,11 @@ _______________________________________________________________*/
 #define END_CONF 884          //(3*24*60)/5)
 #define MAX_START_TIME 883    //(3*24*60)/5)-1
 
+#define START_TIME_291 0
+#define START_TIME_292 12
+#define START_TIME_294 24
+#define START_TIME_295 36
+
 using namespace std;
 
 typedef struct{
@@ -313,21 +318,37 @@ displayAllTracks();
 
 \GenomeClass::initialiser : // "initializer" is also accepted
   for(int i=0; i < papers.size(); i++){
+    Creneau curCrenau;
+    curCrenau.paperID = papers[i].paperID;
+    curCrenau.sessionID = papers[i].sessionID;
+    curCrenau.trackID = papers[i].trackID;
     if(papers[i].trackID != 15){
-      Creneau curCrenau;
-      curCrenau.paperID = papers[i].paperID;
-      curCrenau.sessionID = papers[i].sessionID;
-      curCrenau.trackID = papers[i].trackID;
       curCrenau.startTime = random(0, MAX_START_TIME);
-      Genome.planning[i] = &curCrenau;
     }
     else{
       switch(papers[i].paperID){
+        case 291:
+          curCrenau.startTime = START_TIME_291;
+          break;
+        case 292:
+          curCrenau.startTime = START_TIME_292;
+          break;
+        case 294:
+          curCrenau.startTime = START_TIME_294;
+          break;
+        case 295:
+          curCrenau.startTime = START_TIME_295;
+          break;
         default:
+          cout << "ERROR : plenary speach not recognized" << endl;
+          exit(1);
           break;
       }
     }
+    Genome.planning[i] = &curCrenau;
+    //cout << "paperID : " << curCrenau.paperID << " | startTime : " << curCrenau.startTime << endl;
   }
+
 /*
   unsigned int i,j,k,bIdent = 0;
   for(i = 0; i < papers.size(); i++)
