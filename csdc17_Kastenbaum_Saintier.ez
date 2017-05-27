@@ -131,11 +131,11 @@ Session& getSessionInTrack(Track& track, int sessionID, string sessionTitle){
 }
 
 int paperTypeToDuration(string paperType){
-  if (paperType == "Short Paper")
+  if (paperType == "Short paper")
     return 3;
   if (paperType == "Invited talk")
     return 3;
-  if (paperType == "Full Paper")
+  if (paperType == "Full paper")
     return 6;
   if (paperType == "New Result invited paper")
     return 6;
