@@ -185,40 +185,20 @@ void readPapersFile(){
       p.duration = paperTypeToDuration(token);
       token = my_strtok(line, sep, lastSep); p.utc = atoi(token.c_str())*12;
 
-      string day1constraint = my_strtok(line, sep, lastSep);
-      char * d1str = new char [day1constraint.length()];
-      strcpy(d1str, day1constraint.c_str());
-      tokenStart = strtok(d1str, ",[]"); tokenEnd = strtok(NULL, ",[]");
-      while (tokenStart != NULL && tokenEnd != NULL){
-        Constraint c;
-        c.begin = atoi(tokenStart)*12+p.utc;
-        c.end  = atoi(tokenEnd)*12+p.utc;
-        p.constraints.push_back(c);
-        tokenStart = strtok(NULL, ",[]"); tokenEnd = strtok(NULL, ",[]");
-      }
-
-      string day2constraint = my_strtok(line, sep, lastSep);
-      char * d2str = new char [day2constraint.length()];
-      strcpy(d2str, day2constraint.c_str());
-      tokenStart = strtok(d2str, ",[]"); tokenEnd = strtok(NULL, ",[]");
-      while (tokenStart != NULL && tokenEnd != NULL){
-        Constraint c;
-        c.begin = atoi(tokenStart)*12+p.utc+12*24;
-        c.end  = atoi(tokenEnd)*12+p.utc+12*24;
-        p.constraints.push_back(c);
-        tokenStart = strtok(NULL, ",[]"); tokenEnd = strtok(NULL, ",[]");
-      }
-
-      string day3constraint = my_strtok(line, sep, lastSep);
-      char * d3str = new char [day3constraint.length()];
-      strcpy(d3str, day3constraint.c_str());
-      tokenStart = strtok(d3str, ",[]"); tokenEnd = strtok(NULL, ",[]");
-      while (tokenStart != NULL && tokenEnd != NULL){
-        Constraint c;
-        c.begin = atoi(tokenStart)*12+p.utc+12*48;
-        c.end  = atoi(tokenEnd)*12+p.utc+12*48;
-        p.constraints.push_back(c);
-        tokenStart = strtok(NULL, ",[]"); tokenEnd = strtok(NULL, ",[]");
+      for (int day=0; day < 3; day++){
+        string dayConstraint = my_strtok(line, sep, lastSep);
+        if (dayConstraint.length() != 0){
+          char * dstr = new char [dayConstraint.length()+1];
+          strcpy(dstr, dayConstraint.c_str());
+          tokenStart = strtok(dstr, ",[]"); tokenEnd = strtok(NULL, ",[]");
+          while (tokenStart != NULL && tokenEnd != NULL){
+            Constraint c;
+            c.begin = atoi(tokenStart)*12+p.utc+day*12*24;
+            c.end  = atoi(tokenEnd)*12+p.utc+day*12*24;
+            p.constraints.push_back(c);
+            tokenStart = strtok(NULL, ",[]"); tokenEnd = strtok(NULL, ",[]");
+          }
+        }
       }
 
       papers.push_back(p);
