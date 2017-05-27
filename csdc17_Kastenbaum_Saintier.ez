@@ -51,6 +51,12 @@ typedef struct{
   vector<Session> sessions;
 }Track;
 
+typedef struct{
+  int nbPapersEndTooLate;     //papers that end after the 3rd day ends
+  int nbPapersOverLap;        //papers that overlap with another one
+  int nbPapersDeadlyOverlap;  //papers that overlap with track 15
+}Eval;
+
 ifstream fPaper;
 vector<Paper> papers;
 vector<Track> tracks;
@@ -213,9 +219,21 @@ void readPapersFile(){
       Track& t = getTrack(p.trackID, p.trackTitle);
       Session& s = getSessionInTrack(t, p.sessionID, p.sessionTitle);
       s.papers.push_back(p);
-    } 
+    }
     fPaper.close();
   }
+}
+
+__device__ __host__ inline Eval getEval( IndividualImpl Genome )
+{
+  int endTime((3*24*60)/5);
+
+  Eval res;
+  res.nbPapersEndTooLate = 0;
+  res.nbPapersOverLap = 0;
+  res.nbPapersDeadlyOverlap = 0;
+
+	return res;
 }
 
 \end
@@ -232,7 +250,7 @@ Creneau {
   int startTime;
 }
 
-GenomeClass { 
+GenomeClass {
   Creneau* planning[NB_PAPER];
 }
 \end
@@ -246,10 +264,10 @@ displayAllTracks();
 
 \After everything else function:
  /* int i, j; */
- /* for (i=0;i<papers.size();i++) { */  
+ /* for (i=0;i<papers.size();i++) { */
  /*  Paper currentPaper = papers.at(i); */
  /*  displayPaper(currentPaper); */
-  
+
  /*  for(j=0;j<currentPaper.nReqRev;j++){ */
  /*    Reviewer currentRev = reviewers.at(bBest->paper[i].reviewer[j]); */
  /*    std::cout << "Reviewer "<<3-currentPaper.nReqRev+j+1<<": " << currentRev.name << ", " << currentRev.mail <<"\n"; */
@@ -272,7 +290,7 @@ displayAllTracks();
  /*    //cout << "-----------\n"; */
  /*  } */
  /*     std::cout << std::endl; */
-   
+
  /* } */
 \end
 
@@ -304,17 +322,18 @@ displayAllTracks();
 */
 \end
 
-\GenomeClass::crossover : 
+\GenomeClass::crossover :
 \end
 
 \GenomeClass::mutator : // Must return the number of mutations
 \end
 
 \GenomeClass::evaluator : // Returns the score as a real value
-
+  Eval res = getEval(Genome);
+  return 0;
 \end
 
-\User Makefile options: 
+\User Makefile options:
 \end
 
 \Default run parameters :        // Please let the parameters appear in this order
@@ -326,7 +345,7 @@ displayAllTracks();
   Crossover probability : 1      // XOVER_PROB
   Evaluator goal : maximise      // maximise
   Selection operator: Tournament 0.6
-  Surviving parents: 100%        // Percentage or absolute  
+  Surviving parents: 100%        // Percentage or absolute
   Surviving offspring: 100%      // Percentage or absolute  d
   Reduce parents operator: Tournament 2
   Reduce offspring operator: Tournament 2
@@ -335,7 +354,7 @@ displayAllTracks();
   Elitism: strong                 // Weak or Strong
   Elite: 1
   Print stats: true               // Default: 1
-  Generate csv stats file:true      
+  Generate csv stats file:true
   Generate gnuplot script:false
   Generate R script:false
   Plot stats:true                 // Default: 0
@@ -348,4 +367,3 @@ displayAllTracks();
   Save population: false
   Start from file:false
 \end
-
