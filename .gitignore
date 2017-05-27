@@ -30,3 +30,14 @@
 *.exe
 *.out
 *.app
+
+# EASEA specific
+Makefile
+*.cpp
+*.csv
+*.dat
+*.mak
+*.prm
+*.hpp
+csdc17_Kastenbaum_Saintier
+
