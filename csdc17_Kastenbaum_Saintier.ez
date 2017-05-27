@@ -16,7 +16,9 @@ _______________________________________________________________*/
 #include <string.h>
 #include <algorithm>
 
-#define NB_PAPER 263;
+#define NB_PAPER 263
+#define END_CONF 884          //(3*24*60)/5)
+#define MAX_START_TIME 883    //(3*24*60)/5)-1
 
 using namespace std;
 
@@ -310,6 +312,22 @@ displayAllTracks();
 \end
 
 \GenomeClass::initialiser : // "initializer" is also accepted
+  for(int i=0; i < papers.size(); i++){
+    if(papers[i].trackID != 15){
+      Creneau curCrenau;
+      curCrenau.paperID = papers[i].paperID;
+      curCrenau.sessionID = papers[i].sessionID;
+      curCrenau.trackID = papers[i].trackID;
+      curCrenau.startTime = random(0, MAX_START_TIME);
+      Genome.planning[i] = &curCrenau;
+    }
+    else{
+      switch(papers[i].paperID){
+        default:
+          break;
+      }
+    }
+  }
 /*
   unsigned int i,j,k,bIdent = 0;
   for(i = 0; i < papers.size(); i++)
