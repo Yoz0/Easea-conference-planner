@@ -6,6 +6,8 @@ Template for an EASEA evolutionary algorithm for easea v1.0.3
 _______________________________________________________________*/
 
 \User declarations : // This section is copied on top of the output file
+#pragma GCC diagnostic ignored "-Wsign-compare"
+
 #include <string>
 #include <iostream>
 #include <fstream>
