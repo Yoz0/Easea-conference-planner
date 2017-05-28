@@ -18,7 +18,6 @@ _______________________________________________________________*/
 
 #define NB_PAPER 263
 #define END_CONF 884          //(3*24*60)/5)
-#define MAX_START_TIME 883    //(3*24*60)/5)-1
 
 #define START_TIME_291 0
 #define START_TIME_292 12
@@ -60,8 +59,11 @@ typedef struct{
 
 typedef struct{
   int nbPapersEndTooLate;     //papers that end after the 3rd day ends
-  int nbPapersOverLap;        //papers that overlap with another one
+  int nbPapersOverLapInterSession; //papers that overlap with another one inside session
+  int nbPapersOverLapInterTrack; //papers that overlap with another one inside track
+  int nbPapersOverLapGeneral; //papers that overlap with another one
   int nbPapersDeadlyOverlap;  //papers that overlap with track 15
+  vector<int> nbCassures;     //nombre de cassure pour chaque sessions
 }Eval;
 
 ifstream fPaper;
@@ -213,12 +215,19 @@ void readPapersFile(){
 
 __device__ __host__ inline Eval getEval( IndividualImpl Genome )
 {
-  int endTime((3*24*60)/5);
-
   Eval res;
   res.nbPapersEndTooLate = 0;
-  res.nbPapersOverLap = 0;
+  res.nbPapersOverLapInterSession = 0;
+  res.nbPapersOverLapInterTrack = 0;
+  res.nbPapersOverLapGeneral = 0;
   res.nbPapersDeadlyOverlap = 0;
+
+  for(int i = 0; i < NB_PAPER; i++){
+    //dealing with ith paper
+    if(Genome.planning[i]->startTime + papers[i].duration > END_CONF){
+      res.nbPapersEndTooLate++;
+    }
+  }
 
 	return res;
 }
@@ -303,7 +312,7 @@ displayAllTracks();
     curCrenau.sessionID = papers[i].sessionID;
     curCrenau.trackID = papers[i].trackID;
     if(papers[i].trackID != 15){
-      curCrenau.startTime = random(0, MAX_START_TIME);
+      curCrenau.startTime = random(0, END_CONF);
     }
     else{
       switch(papers[i].paperID){
