@@ -83,7 +83,7 @@ void displayPaper(Paper p){
   cout << "    Paper : " << p.paperID << " - " << p.paperTitle << endl;
   cout << "      UTC : " << p.utc << " Duration : " << p.duration  << endl;
   cout << "      Constraint : ";
-  for (int i=0; i < p.constraints.size(); i++){
+  for (size_t i=0; i < p.constraints.size(); i++){
     displayConstraint(p.constraints[i]);
     cout << " ; ";
   }
@@ -91,9 +91,8 @@ void displayPaper(Paper p){
 }
 
 void displaySession(Session s){
-  int i;
   cout << "  Session : " << s.sessionID << " - " << s.sessionTitle << endl;
-  for(i = 0; i < s.papers.size(); i++)
+  for(size_t i = 0; i < s.papers.size(); i++)
   {
     displayPaper(s.papers[i]);
   }
@@ -101,13 +100,13 @@ void displaySession(Session s){
 
 void displayTrack(Track t){
   cout << "Track : " << t.trackID << " - " << t.trackTitle << endl;
-  for (int i = 0; i < t.sessions.size(); i++){
+  for (size_t i = 0; i < t.sessions.size(); i++){
     displaySession(t.sessions[i]);
   }
 }
 
 void displayAllTracks() {
-  for (int i = 0; i < tracks.size(); i++){
+  for (size_t i = 0; i < tracks.size(); i++){
     displayTrack(tracks[i]);
   }
 }
@@ -121,7 +120,7 @@ string my_strtok(string str, const char sep, size_t& lastSep){
 
 // Find an exisitng track or create it and return it
 Track& getTrack(int trackID, string trackTitle){
-  for (int i=0; i < tracks.size(); ++i){
+  for (size_t i=0; i < tracks.size(); ++i){
     if (tracks[i].trackID == trackID){
       return tracks[i];
     }
@@ -135,7 +134,7 @@ Track& getTrack(int trackID, string trackTitle){
 
 // Find an existing session in the track or create it an return it
 Session& getSessionInTrack(Track& track, int sessionID, string sessionTitle){
-  for (int i=0; i < track.sessions.size(); i++){
+  for (size_t i=0; i < track.sessions.size(); i++){
     if (track.sessions[i].sessionID == sessionID){
       return track.sessions[i];
     }
@@ -278,7 +277,7 @@ readPapersFile();
 \end
 
 \GenomeClass::initialiser : // "initializer" is also accepted
-  for(int i=0; i < papers.size(); i++){
+  for(size_t i=0; i < papers.size(); i++){
     Creneau* curCrenau = (Creneau*) malloc(sizeof(Creneau));
     curCrenau->paperID = papers[i].paperID;
     curCrenau->sessionID = papers[i].sessionID;
