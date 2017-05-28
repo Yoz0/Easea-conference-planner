@@ -34,10 +34,11 @@
 # EASEA specific
 Makefile
 *.cpp
-*.csv
 *.dat
 *.mak
 *.prm
 *.hpp
 csdc17_Kastenbaum_Saintier
+csdc17_Kastenbaum_Saintier.csv
+csdc17_Kastenbaum_Saintier.plot
 
