@@ -230,12 +230,6 @@ Session* findSession(int trackID, int sessionID){
 }
 
 void displayEval(Eval eval){
-  int nbPapersEndTooLate;     //papers that end after the 3rd day ends
-  int nbPapersOverLapInterSession; //papers that overlap with another one inside session
-  int nbPapersOverLapInterTrack; //papers that overlap with another one inside track
-  int nbPapersOverLapGeneral; //papers that overlap with another one
-  int nbPapersDeadlyOverlap;  //papers that overlap with track 15
-  vector<int> nbCassures;     //nombre de cassure pour chaque sessions
   cout << "Eval[" << eval.nbPapersEndTooLate << " " << eval.nbPapersOverLapInterSession << " " << eval.nbPapersOverLapInterTrack << " " << eval.nbPapersOverLapGeneral << " " << eval.nbPapersDeadlyOverlap << "]" << endl;
 }
 
