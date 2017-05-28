@@ -436,7 +436,16 @@ readPapersFile();
 
 \GenomeClass::evaluator : // Returns the score as a real value
   Eval res = getEval(Genome);
-  return 0;
+  int strong = res.nbPapersEndTooLate +
+               res.nbPapersOverLapInterSession +
+               res.nbPapersOverLapInterTrack +
+               res.nbPapersDeadlyOverlap;
+
+  int weak = res.nbPapersOverLapGeneral;
+  for (size_t i=0; i < res.nbCassures.size(); i++){
+    weak += res.nbCassures[i];
+  }
+  return (float) weak + 1000 * strong;
 \end
 
 \User Makefile options:
@@ -449,7 +458,7 @@ readPapersFile();
   Offspring size : 64// or a xx%
   Mutation probability : 0.8       // MUT_PROB
   Crossover probability : 1      // XOVER_PROB
-  Evaluator goal : maximise      // maximise
+  Evaluator goal : minimise      // maximise
   Selection operator: Tournament 0.6
   Surviving parents: 100%        // Percentage or absolute
   Surviving offspring: 100%      // Percentage or absolute  d
