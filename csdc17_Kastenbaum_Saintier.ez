@@ -325,6 +325,27 @@ readPapersFile();
 \end
 
 \GenomeClass::mutator : // Must return the number of mutations
+  int nbMutation = 0;
+  size_t nbMutMax = 100;
+  float pMutPerGene = 0.5;
+  for(size_t i=0; i < nbMutMax; i++){
+    if(tossCoin(pMutPerGene)){
+      nbMutation ++;
+      int rand = random(0, 2);
+      if(rand == 0){
+        Creneau* creneauToChange = Genome.planning[random(0,NB_PAPER)];
+        creneauToChange->startTime = random(0,END_CONF);
+      }
+      if(rand == 1){
+        Creneau* creneauToChange1 = Genome.planning[random(0,NB_PAPER)];
+        Creneau* creneauToChange2 = Genome.planning[random(0,NB_PAPER)];
+        int temp = creneauToChange2->startTime;
+        creneauToChange2->startTime = creneauToChange1->startTime;
+        creneauToChange1->startTime = temp;
+      }
+    }
+  }
+  return nbMutation;
 \end
 
 \GenomeClass::evaluator : // Returns the score as a real value
