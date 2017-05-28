@@ -351,6 +351,17 @@ displayAllTracks();
 \end
 
 \GenomeClass::crossover :
+  for(size_t i=0; i<NB_PAPER;i++){
+    child.planning[i]->paperID = papers[i].paperID;
+    child.planning[i]->sessionID = papers[i].sessionID;
+    child.planning[i]->trackID = papers[i].trackID;
+    if(tossCoin(0.5)){
+      child.planning[i]->startTime = parent1.planning[i]->startTime;
+    }
+    else{
+      child.planning[i]->startTime = parent2.planning[i]->startTime;
+    }
+  }
 \end
 
 \GenomeClass::mutator : // Must return the number of mutations
