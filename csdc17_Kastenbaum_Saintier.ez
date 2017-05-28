@@ -18,7 +18,9 @@ _______________________________________________________________*/
 #include <string.h>
 #include <algorithm>
 
+#define INPUT_FILE "papers.csv"
 #define NB_PAPER 263
+
 #define END_CONF 884          //(3*24*60)/5)
 
 #define START_TIME_291 0
@@ -168,7 +170,7 @@ int paperTypeToDuration(string paperType){
 //Read Papers File
 //PaperID | PaperTitle | TrackID | TrackTitle | SessionID | SessionTitle | paperType | utc | TimeConstraint Day 1 | TimeConstraint Day 2 | TimeConstraint Day 3
 void readPapersFile(){
-  fPaper.open("papers.csv", ios::in);
+  fPaper.open(INPUT_FILE, ios::in);
   const char sep = '%';
   string line;
   if (fPaper.is_open()) {
@@ -214,6 +216,37 @@ void readPapersFile(){
   }
 }
 
+Session* findSession(int trackID, int sessionID){
+  for(int i = 0; i < tracks.size(); i++){
+    if(tracks[i].trackID == trackID){
+      for(int j = 0; j < tracks[i].sessions.size(); j++){
+        if(tracks[i].sessions[j].sessionID == sessionID){
+          return &(tracks[i].sessions[j]);
+        }
+      }
+    }
+  }
+  return NULL;
+}
+
+void displayEval(Eval eval){
+  int nbPapersEndTooLate;     //papers that end after the 3rd day ends
+  int nbPapersOverLapInterSession; //papers that overlap with another one inside session
+  int nbPapersOverLapInterTrack; //papers that overlap with another one inside track
+  int nbPapersOverLapGeneral; //papers that overlap with another one
+  int nbPapersDeadlyOverlap;  //papers that overlap with track 15
+  vector<int> nbCassures;     //nombre de cassure pour chaque sessions
+  cout << "Eval[" << eval.nbPapersEndTooLate << " " << eval.nbPapersOverLapInterSession << " " << eval.nbPapersOverLapInterTrack << " " << eval.nbPapersOverLapGeneral << " " << eval.nbPapersDeadlyOverlap << "]" << endl;
+}
+
+void displayGenome(IndividualImpl Genome){
+  cout << "Genome[";
+  for(int i = 0; i<NB_PAPER; i++){
+    cout << Genome.planning[i]->startTime << " ";
+  }
+  cout << "]"<< endl;
+}
+
 Eval getEval( IndividualImpl Genome )
 {
   Eval res;
@@ -223,13 +256,67 @@ Eval getEval( IndividualImpl Genome )
   res.nbPapersOverLapGeneral = 0;
   res.nbPapersDeadlyOverlap = 0;
 
+  int startThis, endThis, startOther, endOther;
   for(int i = 0; i < NB_PAPER; i++){
-    //dealing with ith paper
+    //checking if paper ends after conf
     if(Genome.planning[i]->startTime + papers[i].duration > END_CONF){
       res.nbPapersEndTooLate++;
     }
+
+    //checking if paper overlaps with other papers
+    startThis = Genome.planning[i]->startTime;
+    endThis = startThis + papers[i].duration;
+    for(int j = 0; j < NB_PAPER; j++){
+      if (j == i) continue;
+      startOther = Genome.planning[j]->startTime;
+      endOther = startOther + papers[j].duration;
+      if ((startOther <= startThis && startThis < endOther) ||
+          (startThis <= startOther && startOther < endThis)){
+        //If one paper presentation begins during the other paper presentation
+        //=> overlap
+        res.nbPapersOverLapGeneral++;
+        if (papers[i].trackID == papers[j].trackID){
+          res.nbPapersOverLapInterTrack++;
+          if (papers[i].sessionID == papers[j].sessionID) {
+            res.nbPapersOverLapInterSession++;
+          }
+        }
+        if (papers[j].trackID == 15){
+          res.nbPapersDeadlyOverlap++;
+        }
+      }
+    }
+
+    //ljhgljhk
   }
   return res;
+}
+
+void testGetEval(){
+  IndividualImpl* myGenome = new IndividualImpl;
+  Creneau* cre1 = new Creneau;
+  Creneau* cre2 = new Creneau;
+  Creneau* cre3 = new Creneau;
+  Creneau* cre4 = new Creneau;
+  Creneau* cre5 = new Creneau;
+  Creneau* cre6 = new Creneau;
+  Creneau* cre7 = new Creneau;
+  cre1->paperID = 291; cre1->sessionID = 150; cre1->trackID = 15;  cre1->startTime = 10000;
+  cre2->paperID = 292; cre2->sessionID = 150; cre2->trackID = 15;  cre2->startTime = 0;
+  cre3->paperID = 294; cre3->sessionID = 150; cre3->trackID = 15;  cre3->startTime = 4;
+  cre4->paperID = 295; cre4->sessionID = 150; cre4->trackID = 15;  cre4->startTime = 6; //lasts 2
+  cre5->paperID = 18; cre5->sessionID = 53; cre5->trackID = 6;     cre5->startTime = 8; //lasts 6
+  cre6->paperID = 21; cre6->sessionID = 55; cre6->trackID = 6;  cre6->startTime = 10001;
+  cre7->paperID = 133; cre7->sessionID = 55; cre7->trackID = 6;  cre7->startTime = 32;
+  myGenome->planning[0] = cre1;
+  myGenome->planning[1] = cre2;
+  myGenome->planning[2] = cre3;
+  myGenome->planning[3] = cre4;
+  myGenome->planning[4] = cre5;
+  myGenome->planning[5] = cre6;
+  myGenome->planning[6] = cre7;
+  Eval myEval = getEval(*myGenome);
+  displayEval(myEval);
 }
 
 \end
@@ -254,7 +341,6 @@ GenomeClass {
 \Before everything else function:
 
 readPapersFile();
-
 \end
 
 \After everything else function:
