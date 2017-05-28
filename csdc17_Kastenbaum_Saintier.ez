@@ -278,7 +278,7 @@ readPapersFile();
 
 \GenomeClass::initialiser : // "initializer" is also accepted
   for(size_t i=0; i < papers.size(); i++){
-    Creneau* curCrenau = (Creneau*) malloc(sizeof(Creneau));
+    Creneau* curCrenau = new Creneau;
     curCrenau->paperID = papers[i].paperID;
     curCrenau->sessionID = papers[i].sessionID;
     curCrenau->trackID = papers[i].trackID;
@@ -306,7 +306,6 @@ readPapersFile();
       }
     }
     Genome.planning[i] = curCrenau;
-    //cout << "paperID : " << curCrenau.paperID << " | startTime : " << curCrenau.startTime << endl;
   }
 
 \end
