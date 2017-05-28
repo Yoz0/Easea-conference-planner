@@ -67,6 +67,7 @@ typedef struct{
   int nbPapersOverLapInterTrack; //papers that overlap with another one inside track
   int nbPapersOverLapGeneral; //papers that overlap with another one
   int nbPapersDeadlyOverlap;  //papers that overlap with track 15
+  int nbPapersNotInConstraint;
   vector<int> nbCassures;     //nombre de cassure pour chaque sessions
 }Eval;
 
@@ -249,6 +250,7 @@ Eval getEval( IndividualImpl Genome )
   res.nbPapersOverLapInterTrack = 0;
   res.nbPapersOverLapGeneral = 0;
   res.nbPapersDeadlyOverlap = 0;
+  res.nbPapersNotInConstraint = 0;
 
   int startThis, endThis, startOther, endOther;
   for(size_t i = 0; i < NB_PAPER; i++){
@@ -282,7 +284,21 @@ Eval getEval( IndividualImpl Genome )
       }
     }
 
-    //ljhgljhk
+    //checking if paper is presented during the constraints
+    if(papers[i].constraints.size() != 0){
+      size_t j = 0;
+      bool isNotInConstraint = true;
+      while (j<papers.size() && isNotInConstraint){
+        Constraint constraint = papers[i].constraints[j];
+        if (constraint.begin <= startThis && endThis <= constraint.end){
+          isNotInConstraint = false;
+        }
+        j++;
+      }
+      if (isNotInConstraint){
+        res.nbPapersNotInConstraint++;
+      }
+    }
   }
   return res;
 }
@@ -437,12 +453,14 @@ readPapersFile();
   int weightOverLapInterSession = 100;
   int weightDeadlyOverlap = 100;
   int weightCassures = 10;
+  int weightNotInConstraint = 100;
 
   int valueOfEval = res.nbPapersEndTooLate * weightEndTooLate+
                     res.nbPapersOverLapInterSession * weightOverLapInterSession +
                     res.nbPapersOverLapInterTrack * weightOverLapInterTrack +
                     res.nbPapersDeadlyOverlap * weightDeadlyOverlap +
-                    res.nbPapersOverLapGeneral * weightOverLapGeneral;
+                    res.nbPapersOverLapGeneral * weightOverLapGeneral +
+                    res.nbPapersNotInConstraint * weightNotInConstraint;
   for (size_t i=0; i < res.nbCassures.size(); i++){
     valueOfEval += res.nbCassures[i] * weightCassures;
   }
