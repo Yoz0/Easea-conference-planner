@@ -307,26 +307,26 @@ displayAllTracks();
 
 \GenomeClass::initialiser : // "initializer" is also accepted
   for(int i=0; i < papers.size(); i++){
-    Creneau curCrenau;
-    curCrenau.paperID = papers[i].paperID;
-    curCrenau.sessionID = papers[i].sessionID;
-    curCrenau.trackID = papers[i].trackID;
+    Creneau* curCrenau = (Creneau*) malloc(sizeof(Creneau));
+    curCrenau->paperID = papers[i].paperID;
+    curCrenau->sessionID = papers[i].sessionID;
+    curCrenau->trackID = papers[i].trackID;
     if(papers[i].trackID != 15){
-      curCrenau.startTime = random(0, END_CONF);
+      curCrenau->startTime = random(0, END_CONF);
     }
     else{
       switch(papers[i].paperID){
         case 291:
-          curCrenau.startTime = START_TIME_291;
+          curCrenau->startTime = START_TIME_291;
           break;
         case 292:
-          curCrenau.startTime = START_TIME_292;
+          curCrenau->startTime = START_TIME_292;
           break;
         case 294:
-          curCrenau.startTime = START_TIME_294;
+          curCrenau->startTime = START_TIME_294;
           break;
         case 295:
-          curCrenau.startTime = START_TIME_295;
+          curCrenau->startTime = START_TIME_295;
           break;
         default:
           cout << "ERROR : plenary speach not recognized" << endl;
@@ -334,7 +334,7 @@ displayAllTracks();
           break;
       }
     }
-    Genome.planning[i] = &curCrenau;
+    Genome.planning[i] = curCrenau;
     //cout << "paperID : " << curCrenau.paperID << " | startTime : " << curCrenau.startTime << endl;
   }
 
