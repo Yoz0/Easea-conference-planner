@@ -431,16 +431,22 @@ readPapersFile();
 
 \GenomeClass::evaluator : // Returns the score as a real value
   Eval res = getEval(Genome);
-  int strong = res.nbPapersEndTooLate +
-               res.nbPapersOverLapInterSession +
-               res.nbPapersOverLapInterTrack +
-               res.nbPapersDeadlyOverlap;
+  int weightEndTooLate = 100;
+  int weightOverLapGeneral = 1;
+  int weightOverLapInterTrack = 100;
+  int weightOverLapInterSession = 100;
+  int weightDeadlyOverlap = 100;
+  int weightCassures = 10;
 
-  int weak = res.nbPapersOverLapGeneral;
+  int valueOfEval = res.nbPapersEndTooLate * weightEndTooLate+
+                    res.nbPapersOverLapInterSession * weightOverLapInterSession +
+                    res.nbPapersOverLapInterTrack * weightOverLapInterTrack +
+                    res.nbPapersDeadlyOverlap * weightDeadlyOverlap +
+                    res.nbPapersOverLapGeneral * weightOverLapGeneral;
   for (size_t i=0; i < res.nbCassures.size(); i++){
-    weak += res.nbCassures[i];
+    valueOfEval += res.nbCassures[i] * weightCassures;
   }
-  return (float) weak + 1000 * strong;
+  return (float) valueOfEval;
 \end
 
 \User Makefile options:
