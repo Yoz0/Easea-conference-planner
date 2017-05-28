@@ -251,7 +251,7 @@ Eval getEval( IndividualImpl Genome )
   res.nbPapersDeadlyOverlap = 0;
 
   int startThis, endThis, startOther, endOther;
-  for(int i = 0; i < NB_PAPER; i++){
+  for(size_t i = 0; i < NB_PAPER; i++){
     //checking if paper ends after conf
     if(Genome.planning[i]->startTime + papers[i].duration > END_CONF){
       res.nbPapersEndTooLate++;
@@ -260,23 +260,24 @@ Eval getEval( IndividualImpl Genome )
     //checking if paper overlaps with other papers
     startThis = Genome.planning[i]->startTime;
     endThis = startThis + papers[i].duration;
-    for(int j = 0; j < NB_PAPER; j++){
-      if (j == i) continue;
+    for(size_t j = i+1; j < NB_PAPER; j++){
       startOther = Genome.planning[j]->startTime;
       endOther = startOther + papers[j].duration;
       if ((startOther <= startThis && startThis < endOther) ||
           (startThis <= startOther && startOther < endThis)){
         //If one paper presentation begins during the other paper presentation
         //=> overlap
-        res.nbPapersOverLapGeneral++;
-        if (papers[i].trackID == papers[j].trackID){
-          res.nbPapersOverLapInterTrack++;
-          if (papers[i].sessionID == papers[j].sessionID) {
-            res.nbPapersOverLapInterSession++;
-          }
-        }
         if (papers[j].trackID == 15){
           res.nbPapersDeadlyOverlap++;
+        }
+        else if (papers[i].sessionID == papers[j].sessionID) {
+          res.nbPapersOverLapInterSession++;
+        }
+        else if (papers[i].trackID == papers[j].trackID){
+          res.nbPapersOverLapInterTrack++;
+        }
+        else{
+          res.nbPapersOverLapGeneral++;
         }
       }
     }
