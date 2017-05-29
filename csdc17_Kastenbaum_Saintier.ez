@@ -19,10 +19,10 @@ _______________________________________________________________*/
 #include <algorithm>
 #include <map>
 
-// #define INPUT_FILE "papers.csv"
+#define INPUT_FILE "papers.csv"
+#define NB_PAPER 263
+// #define INPUT_FILE "papers_little.csv"
 // #define NB_PAPER 7
-#define INPUT_FILE "papers_little.csv"
-#define NB_PAPER 7
 
 #define END_CONF 884          //(3*24*60)/5)
 
@@ -276,7 +276,6 @@ bool creneauComp (Creneau* cre1, Creneau* cre2) {
 
 Eval getEval( IndividualImpl Genome )
 {
-  cout << "evaluating" << endl;
   Eval res;
   res.nbPapersEndTooLate = 0;
   res.nbPapersOverLapInterSession = 0;
@@ -333,7 +332,6 @@ Eval getEval( IndividualImpl Genome )
     }
   }
 
-  cout << "calcul des longueures" << endl;
   //réccupere la longueures des cassures
   //il faut d'abbord répartir les creneaux par sessionToVector
   //entre les sessionID et le vecteur qui contient les creneaux des papiers de cette session
@@ -353,30 +351,27 @@ Eval getEval( IndividualImpl Genome )
     sort(it->second->begin(),it->second->end(),creneauComp);
   }
 
-  cout << "found " << sessionToVector.size() << " sessions" <<endl;
-
-  // int endTimePrevPaper = 0;
-  // int curCoupure = 0;
-  // Paper* prevPaper = NULL;
-  // Creneau* prevPaperCreneau = NULL;
-  // for(it = sessionToVector.begin(); it != sessionToVector.end(); ++it)
-  // {
-  //   cout << "dealing with session : " << it->first << endl;
-  //   vector<Creneau*>* vecCre = it->second;
-  //   for(int i = 1; i < vecCre->size(); i++){
-  //     res.tailleCassures.push_back(*(new vector<int>));
-  //     prevPaperCreneau = (*vecCre)[i-1];
-  //     prevPaper = getPaper(prevPaperCreneau->trackID, prevPaperCreneau->sessionID, prevPaperCreneau->paperID);
-  //     if(prevPaper == NULL){
-  //       cout << "================ before paper not found ================" << endl;
-  //     }
-  //     endTimePrevPaper = prevPaperCreneau->startTime + prevPaper->duration;
-  //     curCoupure = (*vecCre)[i]->startTime - endTimePrevPaper;
-  //     if(curCoupure > 0){
-  //       res.tailleCassures.back().push_back(curCoupure);
-  //     }
-  //   }
-  // }
+  int endTimePrevPaper = 0;
+  int curCoupure = 0;
+  Paper* prevPaper = NULL;
+  Creneau* prevPaperCreneau = NULL;
+  for(it = sessionToVector.begin(); it != sessionToVector.end(); ++it)
+  {
+    vector<Creneau*>* vecCre = it->second;
+    for(int i = 1; i < vecCre->size(); i++){
+      res.tailleCassures.push_back(*(new vector<int>));
+      prevPaperCreneau = (*vecCre)[i-1];
+      prevPaper = getPaper(prevPaperCreneau->trackID, prevPaperCreneau->sessionID, prevPaperCreneau->paperID);
+      if(prevPaper == NULL){
+        cout << "================ before paper not found ================" << endl;
+      }
+      endTimePrevPaper = prevPaperCreneau->startTime + prevPaper->duration;
+      curCoupure = (*vecCre)[i]->startTime - endTimePrevPaper;
+      if(curCoupure > 0){
+        res.tailleCassures.back().push_back(curCoupure);
+      }
+    }
+  }
 
   return res;
 }
@@ -391,13 +386,13 @@ void testGetEval(){
   Creneau* cre5 = new Creneau;
   Creneau* cre6 = new Creneau;
   Creneau* cre7 = new Creneau;
-  cre1->paperID = 291; cre1->sessionID = 150; cre1->trackID = 15;  cre1->startTime = 10000;
-  cre2->paperID = 292; cre2->sessionID = 150; cre2->trackID = 15;  cre2->startTime = 0;
-  cre3->paperID = 294; cre3->sessionID = 150; cre3->trackID = 15;  cre3->startTime = 4;
-  cre4->paperID = 295; cre4->sessionID = 150; cre4->trackID = 15;  cre4->startTime = 6; //lasts 2
-  cre5->paperID = 18; cre5->sessionID = 53; cre5->trackID = 6;     cre5->startTime = 8; //lasts 6
-  cre6->paperID = 21; cre6->sessionID = 55; cre6->trackID = 6;  cre6->startTime = 10001;
-  cre7->paperID = 133; cre7->sessionID = 55; cre7->trackID = 6;  cre7->startTime = 32;
+  cre1->paperID = 291; cre1->sessionID = 150; cre1->trackID = 15;  cre1->startTime = 0;
+  cre2->paperID = 292; cre2->sessionID = 150; cre2->trackID = 15;  cre2->startTime = 50;
+  cre3->paperID = 294; cre3->sessionID = 150; cre3->trackID = 15;  cre3->startTime = 100;
+  cre4->paperID = 295; cre4->sessionID = 150; cre4->trackID = 15;  cre4->startTime = 150; //lasts 2
+  cre5->paperID = 18; cre5->sessionID = 53; cre5->trackID = 6;     cre5->startTime = 200; //lasts 6
+  cre6->paperID = 21; cre6->sessionID = 55; cre6->trackID = 6;  cre6->startTime = 250;
+  cre7->paperID = 133; cre7->sessionID = 55; cre7->trackID = 6;  cre7->startTime = 300;
   myGenome->planning[0] = cre1;
   myGenome->planning[1] = cre2;
   myGenome->planning[2] = cre3;
@@ -431,8 +426,8 @@ GenomeClass {
 \Before everything else function:
 
 readPapersFile();
-testGetEval();
-exit(1);
+// testGetEval();
+// exit(1);
 
 \end
 
