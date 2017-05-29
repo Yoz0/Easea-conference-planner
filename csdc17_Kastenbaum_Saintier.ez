@@ -19,10 +19,10 @@ _______________________________________________________________*/
 #include <algorithm>
 #include <map>
 
-#define INPUT_FILE "papers.csv"
-#define NB_PAPER 263
-/* #define INPUT_FILE "papers_little.csv" */
-/* #define NB_PAPER 7 */
+// #define INPUT_FILE "papers.csv"
+// #define NB_PAPER 7
+#define INPUT_FILE "papers_little.csv"
+#define NB_PAPER 7
 
 #define END_CONF 884          //(3*24*60)/5)
 
@@ -245,12 +245,38 @@ void displayGenome(IndividualImpl Genome){
   cout << "]"<< endl;
 }
 
+Paper* getPaper(int trackID, int sessionID, int paperID){
+  Track* curTrack = NULL;
+  for(int i = 0; i<tracks.size(); i++){
+    if(tracks[i].trackID == trackID){
+      curTrack = &tracks[i];
+    }
+  }
+  if(curTrack == NULL) return NULL;
+
+  Session* curSession = NULL;
+  for(int i = 0; i<curTrack->sessions.size(); i++){
+    if(curTrack->sessions[i].sessionID == sessionID){
+      curSession = &(curTrack->sessions[i]);
+    }
+  }
+  if(curSession == NULL) return NULL;
+
+  for(int i = 0; i<curSession->papers.size(); i++){
+    if(curSession->papers[i].paperID == paperID){
+      return &(curSession->papers[i]);
+    }
+  }
+  return NULL;
+}
+
 bool creneauComp (Creneau* cre1, Creneau* cre2) {
   return (cre1->startTime < cre2->startTime);
 }
 
 Eval getEval( IndividualImpl Genome )
 {
+  cout << "evaluating" << endl;
   Eval res;
   res.nbPapersEndTooLate = 0;
   res.nbPapersOverLapInterSession = 0;
@@ -307,6 +333,7 @@ Eval getEval( IndividualImpl Genome )
     }
   }
 
+  cout << "calcul des longueures" << endl;
   //réccupere la longueures des cassures
   //il faut d'abbord répartir les creneaux par sessionToVector
   //entre les sessionID et le vecteur qui contient les creneaux des papiers de cette session
@@ -325,12 +352,37 @@ Eval getEval( IndividualImpl Genome )
   for(it=sessionToVector.begin(); it!=sessionToVector.end(); it++){
     sort(it->second->begin(),it->second->end(),creneauComp);
   }
-  
+
+  cout << "found " << sessionToVector.size() << " sessions" <<endl;
+
+  // int endTimePrevPaper = 0;
+  // int curCoupure = 0;
+  // Paper* prevPaper = NULL;
+  // Creneau* prevPaperCreneau = NULL;
+  // for(it = sessionToVector.begin(); it != sessionToVector.end(); ++it)
+  // {
+  //   cout << "dealing with session : " << it->first << endl;
+  //   vector<Creneau*>* vecCre = it->second;
+  //   for(int i = 1; i < vecCre->size(); i++){
+  //     res.tailleCassures.push_back(*(new vector<int>));
+  //     prevPaperCreneau = (*vecCre)[i-1];
+  //     prevPaper = getPaper(prevPaperCreneau->trackID, prevPaperCreneau->sessionID, prevPaperCreneau->paperID);
+  //     if(prevPaper == NULL){
+  //       cout << "================ before paper not found ================" << endl;
+  //     }
+  //     endTimePrevPaper = prevPaperCreneau->startTime + prevPaper->duration;
+  //     curCoupure = (*vecCre)[i]->startTime - endTimePrevPaper;
+  //     if(curCoupure > 0){
+  //       res.tailleCassures.back().push_back(curCoupure);
+  //     }
+  //   }
+  // }
 
   return res;
 }
 
 void testGetEval(){
+  cout << "testing eval" << endl;
   IndividualImpl* myGenome = new IndividualImpl;
   Creneau* cre1 = new Creneau;
   Creneau* cre2 = new Creneau;
@@ -380,6 +432,7 @@ GenomeClass {
 
 readPapersFile();
 testGetEval();
+exit(1);
 
 \end
 
