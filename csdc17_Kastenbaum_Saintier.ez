@@ -19,10 +19,10 @@ _______________________________________________________________*/
 #include <algorithm>
 #include <map>
 
-// #define INPUT_FILE "papers.csv"
-// #define NB_PAPER 263
-#define INPUT_FILE "papers_little.csv"
-#define NB_PAPER 7
+#define INPUT_FILE "papers.csv"
+#define NB_PAPER 263
+/* #define INPUT_FILE "papers_little.csv" */
+/* #define NB_PAPER 7 */
 
 #define END_CONF 884          //(3*24*60)/5)
 
@@ -245,8 +245,8 @@ void displayGenome(IndividualImpl Genome){
   cout << "]"<< endl;
 }
 
-bool creneauComp (Creneau cre1, Creneau cre2) {
-  return (cre1.startTime < cre2.startTime);
+bool creneauComp (Creneau* cre1, Creneau* cre2) {
+  return (cre1->startTime < cre2->startTime);
 }
 
 Eval getEval( IndividualImpl Genome )
@@ -290,71 +290,42 @@ Eval getEval( IndividualImpl Genome )
       }
     }
 
-    // //checking if paper is presented during the constraints
-    // if(papers[i].constraints.size() != 0){
-    //   size_t j = 0;
-    //   bool isNotInConstraint = true;
-    //   while (j<papers.size() && isNotInConstraint){
-    //     Constraint constraint = papers[i].constraints[j];
-    //     if (constraint.begin <= startThis && endThis <= constraint.end){
-    //       isNotInConstraint = false;
-    //     }
-    //     j++;
-    //   }
-    //   if (isNotInConstraint){
-    //     res.nbPapersNotInConstraint++;
-    //   }
-    // }
+    //checking if paper is presented during the constraints
+    if(papers[i].constraints.size() != 0){
+      size_t j = 0;
+      bool isNotInConstraint = true;
+      while (j<papers.size() && isNotInConstraint){
+        Constraint constraint = papers[i].constraints[j];
+        if (constraint.begin <= startThis && endThis <= constraint.end){
+          isNotInConstraint = false;
+        }
+        j++;
+      }
+      if (isNotInConstraint){
+        res.nbPapersNotInConstraint++;
+      }
+    }
   }
 
   //réccupere la longueures des cassures
   //il faut d'abbord répartir les creneaux par sessionToVector
-  //pour ca, on crée deux structures: un vecteur de vecteur (newPlan) qui va
-  //contenir les Créneaux, organisés par session, et un map, qui fait la correspondance
   //entre les sessionID et le vecteur qui contient les creneaux des papiers de cette session
-  map<int, vector<Creneau>*> sessionToVector;
-  map<int, vector<Creneau>*>::iterator it;
-  vector< vector<Creneau> > newPlan;  //réorganisation des crenaux par sessions
-                                    //newPlan[0] : first sessions
-                                    //newPlan[0][i] : ith paper's Crenau in session 0
-  cout << "for loop" <<endl;
-  for(int i = 0; i<2; i++){
-    cout << "dealing with paper with session : " << Genome.planning[i]->sessionID << " id : " << Genome.planning[i]->paperID << endl;
+  map<int, vector<Creneau*>*> sessionToVector;
+  map<int, vector<Creneau*>*>::iterator it;
+  for(size_t i = 0; i<NB_PAPER; i++){
     it = sessionToVector.find(Genome.planning[i]->sessionID);
     if(it == sessionToVector.end()) { //if we've not dealt with this session yet
-      cout << "paper has a new unseen session" << endl;
-      //create vector for this session and add it to vector of vectors
-      newPlan.push_back(*(new std::vector<Creneau>));
-
-      //add a copy of the Creneau to this newly created vector
-      newPlan.back().push_back(*Genome.planning[i]);
-
-      //add correspondance between sessionID and the vector for this session to the sessionToVector map
-      sessionToVector[Genome.planning[i]->sessionID] = &(newPlan.back());
+      sessionToVector[Genome.planning[i]->sessionID] = new vector<Creneau*>;
     }
-    else{
-      cout << "paper has a session that we know" << endl;
-      cout << "session already has paper id : " << (*sessionToVector[Genome.planning[i]->sessionID])[0].paperID<<endl;
-      vector<Creneau>* bonVecteur = sessionToVector[Genome.planning[i]->sessionID];
-      cout << "pointeur : " << bonVecteur << endl;;
-      cout << "creaneau to add : " << (*Genome.planning[i]).paperID;
-      //(*bonVecteur).push_back(*Genome.planning[i]);
-    }
+    sessionToVector[Genome.planning[i]->sessionID]->push_back(Genome.planning[i]);
   }
   //fini de répartir les Crenaux
   //maintenant on doit trier les Créneaux par heure de départ, pour ca, on utilise
   //une fonction de sort a laquelle on donne une fonction pour comparer les crénaux
-  for(int i = 0; i<newPlan.size(); i++){
-    sort(newPlan[i].begin(), newPlan[i].end(), creneauComp);
-
-    //display:
-    for(int j = 0; j<newPlan[i].size(); j++){
-      //cout << newPlan[i][j].startTime << " ";
-    }
-    cout << endl;
+  for(it=sessionToVector.begin(); it!=sessionToVector.end(); it++){
+    sort(it->second->begin(),it->second->end(),creneauComp);
   }
-
-  exit(1);
+  
 
   return res;
 }
