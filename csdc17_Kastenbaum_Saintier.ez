@@ -17,9 +17,12 @@ _______________________________________________________________*/
 #include <stdio.h>
 #include <string.h>
 #include <algorithm>
+#include <map>
 
-#define INPUT_FILE "papers.csv"
-#define NB_PAPER 263
+// #define INPUT_FILE "papers.csv"
+// #define NB_PAPER 263
+#define INPUT_FILE "papers_little.csv"
+#define NB_PAPER 7
 
 #define END_CONF 884          //(3*24*60)/5)
 
@@ -68,7 +71,7 @@ typedef struct{
   int nbPapersOverLapGeneral; //papers that overlap with another one
   int nbPapersDeadlyOverlap;  //papers that overlap with track 15
   int nbPapersNotInConstraint;
-  vector<int> nbCassures;     //nombre de cassure pour chaque sessions
+  vector< vector<int> > tailleCassures; //longueures des cassures pour chaque sessions
 }Eval;
 
 ifstream fPaper;
@@ -242,6 +245,10 @@ void displayGenome(IndividualImpl Genome){
   cout << "]"<< endl;
 }
 
+bool creneauComp (Creneau cre1, Creneau cre2) {
+  return (cre1.startTime < cre2.startTime);
+}
+
 Eval getEval( IndividualImpl Genome )
 {
   Eval res;
@@ -253,7 +260,7 @@ Eval getEval( IndividualImpl Genome )
   res.nbPapersNotInConstraint = 0;
 
   int startThis, endThis, startOther, endOther;
-  for(size_t i = 0; i < NB_PAPER; i++){
+  for(int i = 0; i < NB_PAPER; i++){
     //checking if paper ends after conf
     if(Genome.planning[i]->startTime + papers[i].duration > END_CONF){
       res.nbPapersEndTooLate++;
@@ -262,44 +269,93 @@ Eval getEval( IndividualImpl Genome )
     //checking if paper overlaps with other papers
     startThis = Genome.planning[i]->startTime;
     endThis = startThis + papers[i].duration;
-    for(size_t j = i+1; j < NB_PAPER; j++){
+    for(int j = 0; j < NB_PAPER; j++){
+      if (j == i) continue;
       startOther = Genome.planning[j]->startTime;
       endOther = startOther + papers[j].duration;
       if ((startOther <= startThis && startThis < endOther) ||
           (startThis <= startOther && startOther < endThis)){
         //If one paper presentation begins during the other paper presentation
         //=> overlap
+        res.nbPapersOverLapGeneral++;
+        if (papers[i].trackID == papers[j].trackID){
+          res.nbPapersOverLapInterTrack++;
+          if (papers[i].sessionID == papers[j].sessionID) {
+            res.nbPapersOverLapInterSession++;
+          }
+        }
         if (papers[j].trackID == 15){
           res.nbPapersDeadlyOverlap++;
-        }
-        else if (papers[i].sessionID == papers[j].sessionID) {
-          res.nbPapersOverLapInterSession++;
-        }
-        else if (papers[i].trackID == papers[j].trackID){
-          res.nbPapersOverLapInterTrack++;
-        }
-        else{
-          res.nbPapersOverLapGeneral++;
         }
       }
     }
 
-    //checking if paper is presented during the constraints
-    if(papers[i].constraints.size() != 0){
-      size_t j = 0;
-      bool isNotInConstraint = true;
-      while (j<papers.size() && isNotInConstraint){
-        Constraint constraint = papers[i].constraints[j];
-        if (constraint.begin <= startThis && endThis <= constraint.end){
-          isNotInConstraint = false;
-        }
-        j++;
-      }
-      if (isNotInConstraint){
-        res.nbPapersNotInConstraint++;
-      }
+    // //checking if paper is presented during the constraints
+    // if(papers[i].constraints.size() != 0){
+    //   size_t j = 0;
+    //   bool isNotInConstraint = true;
+    //   while (j<papers.size() && isNotInConstraint){
+    //     Constraint constraint = papers[i].constraints[j];
+    //     if (constraint.begin <= startThis && endThis <= constraint.end){
+    //       isNotInConstraint = false;
+    //     }
+    //     j++;
+    //   }
+    //   if (isNotInConstraint){
+    //     res.nbPapersNotInConstraint++;
+    //   }
+    // }
+  }
+
+  //réccupere la longueures des cassures
+  //il faut d'abbord répartir les creneaux par sessionToVector
+  //pour ca, on crée deux structures: un vecteur de vecteur (newPlan) qui va
+  //contenir les Créneaux, organisés par session, et un map, qui fait la correspondance
+  //entre les sessionID et le vecteur qui contient les creneaux des papiers de cette session
+  map<int, vector<Creneau>*> sessionToVector;
+  map<int, vector<Creneau>*>::iterator it;
+  vector< vector<Creneau> > newPlan;  //réorganisation des crenaux par sessions
+                                    //newPlan[0] : first sessions
+                                    //newPlan[0][i] : ith paper's Crenau in session 0
+  cout << "for loop" <<endl;
+  for(int i = 0; i<2; i++){
+    cout << "dealing with paper with session : " << Genome.planning[i]->sessionID << " id : " << Genome.planning[i]->paperID << endl;
+    it = sessionToVector.find(Genome.planning[i]->sessionID);
+    if(it == sessionToVector.end()) { //if we've not dealt with this session yet
+      cout << "paper has a new unseen session" << endl;
+      //create vector for this session and add it to vector of vectors
+      newPlan.push_back(*(new std::vector<Creneau>));
+
+      //add a copy of the Creneau to this newly created vector
+      newPlan.back().push_back(*Genome.planning[i]);
+
+      //add correspondance between sessionID and the vector for this session to the sessionToVector map
+      sessionToVector[Genome.planning[i]->sessionID] = &(newPlan.back());
+    }
+    else{
+      cout << "paper has a session that we know" << endl;
+      cout << "session already has paper id : " << (*sessionToVector[Genome.planning[i]->sessionID])[0].paperID<<endl;
+      vector<Creneau>* bonVecteur = sessionToVector[Genome.planning[i]->sessionID];
+      cout << "pointeur : " << bonVecteur << endl;;
+      cout << "creaneau to add : " << (*Genome.planning[i]).paperID;
+      //(*bonVecteur).push_back(*Genome.planning[i]);
     }
   }
+  //fini de répartir les Crenaux
+  //maintenant on doit trier les Créneaux par heure de départ, pour ca, on utilise
+  //une fonction de sort a laquelle on donne une fonction pour comparer les crénaux
+  for(int i = 0; i<newPlan.size(); i++){
+    sort(newPlan[i].begin(), newPlan[i].end(), creneauComp);
+
+    //display:
+    for(int j = 0; j<newPlan[i].size(); j++){
+      //cout << newPlan[i][j].startTime << " ";
+    }
+    cout << endl;
+  }
+
+  exit(1);
+
   return res;
 }
 
@@ -352,6 +408,8 @@ GenomeClass {
 \Before everything else function:
 
 readPapersFile();
+testGetEval();
+
 \end
 
 \After everything else function:
@@ -461,8 +519,10 @@ readPapersFile();
                     res.nbPapersDeadlyOverlap * weightDeadlyOverlap +
                     res.nbPapersOverLapGeneral * weightOverLapGeneral +
                     res.nbPapersNotInConstraint * weightNotInConstraint;
-  for (size_t i=0; i < res.nbCassures.size(); i++){
-    valueOfEval += res.nbCassures[i] * weightCassures;
+  for (size_t i=0; i < res.tailleCassures.size(); i++){
+    for (size_t j=0; j < res.tailleCassures[i].size(); j++){
+      valueOfEval += res.tailleCassures[i][j] * weightCassures;
+    }
   }
   return (float) valueOfEval;
 \end
