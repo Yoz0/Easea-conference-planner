@@ -501,7 +501,8 @@ readPapersFile();
 \GenomeClass::mutator : // Must return the number of mutations
   int nbMutation = 0;
   size_t nbMutMax = 100;
-  float pMutPerGene = 0.5;
+  float pMutPerGene = 0.01;
+  //float pMutPerGene = (1/currentGeneration)-;
   for(size_t i=0; i < nbMutMax; i++){
     if(tossCoin(pMutPerGene)){
       nbMutation ++;
@@ -524,13 +525,13 @@ readPapersFile();
 
 \GenomeClass::evaluator : // Returns the score as a real value
   Eval res = getEval(Genome);
-  int weightEndTooLate = 100;
-  int weightOverLapGeneral = 1;
-  int weightOverLapInterTrack = 100;
-  int weightOverLapInterSession = 100;
-  int weightDeadlyOverlap = 100;
-  int weightCassures = 10;
-  int weightNotInConstraint = 100;
+  int weightEndTooLate = 2000;
+  int weightOverLapGeneral = 0;
+  int weightOverLapInterTrack = 500;
+  int weightOverLapInterSession = 1000;
+  int weightDeadlyOverlap = 2000;
+  int weightCassures = 1;
+  int weightNotInConstraint = 2000;
 
   int valueOfEval = res.nbPapersEndTooLate * weightEndTooLate+
                     res.nbPapersOverLapInterSession * weightOverLapInterSession +
@@ -550,11 +551,11 @@ readPapersFile();
 \end
 
 \Default run parameters :        // Please let the parameters appear in this order
-  Number of generations : 30    // NB_GEN
+  Number of generations : 1000    // NB_GEN
   Time limit: 0                  // In seconds, 0 to deactivate
-  Population size : 64       //POP_SIZE
+  Population size : 1000       //POP_SIZE
   Offspring size : 64// or a xx%
-  Mutation probability : 0.8       // MUT_PROB
+  Mutation probability : 1       // MUT_PROB
   Crossover probability : 1      // XOVER_PROB
   Evaluator goal : minimise      // maximise
   Selection operator: Tournament 0.6
@@ -570,13 +571,13 @@ readPapersFile();
   Generate csv stats file:true
   Generate gnuplot script:false
   Generate R script:false
-  Plot stats:false                 // Default: 0
+  Plot stats:true                 // Default: 0
 
   Remote island model: false
   IP file: ip.txt                // List of IP:PORT of islands to send individuals to
   Migration probability: 0.3    // Probability of sending an individual per generation
   Server port : 2929
 
-  Save population: false
+  Save population: true
   Start from file:false
 \end
